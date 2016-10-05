@@ -915,6 +915,7 @@ public class MainController {
                 try {
                     if (RestUtil.isError(response.getStatusCode())) {
                         MyErrorResource error = objectMapper.readValue(responseBody, MyErrorResource.class);
+                        // no need to catch ForbiddenException here since there are only two results
                         redirectAttributes.addFlashAttribute("editPassword", "fail");
                     } else {
                         redirectAttributes.addFlashAttribute("editPassword", "success");
