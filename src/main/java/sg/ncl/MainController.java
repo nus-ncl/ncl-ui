@@ -163,10 +163,10 @@ public class MainController {
         return "community";
     }
 
-    @RequestMapping("/about")
-    public String about() {
-        return "about";
-    }
+//    @RequestMapping("/about")
+//    public String about() {
+//        return "about";
+//    }
 
     @RequestMapping("/event")
     public String event() {
