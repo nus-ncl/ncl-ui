@@ -72,8 +72,7 @@ public class ConnectionProperties {
         return HTTP_MODE + sioAddress + ":" + sioPort + "/" + regEndpoint;
     }
 
-    public String getSioExpUrl() {
-        return HTTP_MODE + sioAddress + ":" + sioPort + "/" + expEndpoint;
+    public String getSioExpUrl() {return HTTP_MODE + sioAddress + ":" + sioPort + "/" + expEndpoint;
     }
 
     //-------------------------------------
@@ -113,6 +112,7 @@ public class ConnectionProperties {
     public String getApproveJoinRequest(String teamId, String userId) {
         return HTTP_MODE + sioAddress + ":" + sioPort + "/" + regEndpoint + "/teams/" + teamId + "/members/" + userId;
     }
+
 
     //-------------------------------------
     // TEAMS

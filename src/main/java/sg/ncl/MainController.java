@@ -93,6 +93,11 @@ public class MainController {
     private static final String MESSAGE_DELETE_IMAGE_FAILURE = "message_failure";
     private static final String MESSAGE_DELETE_IMAGE_FAILURE_LIST = "message_failure_list";
     private static final String MESSAGE_DELETE_IMAGE_WARNING = "message_warning";
+    private static final String REJECT_JOIN_REQUEST_FAIL = "Reject join request fail";
+    private static final String APPROVE_JOIN_REQUEST_FAIL = "Approve join request fail";
+    private static final String APPROVE_TEAM_REQUEST_FAIL = "Approve team request fail";
+    private static final String REJECT_TEAM_REQUEST_FAIL = "Reject team request fail";
+
     // error messages
     private static final String MAX_DURATION_ERROR = "Auto-shutdown hours must be an integer without any decimals";
     private static final String ERROR_CONNECTING_TO_SERVICE_TELEMETRY = "Error connecting to service-telemetry: {}";
@@ -100,6 +105,7 @@ public class MainController {
     private static final String CONNECTION_ERROR = "Connection Error";
     private final String permissionDeniedMessage = "Permission denied. If the error persists, please contact " + CONTACT_EMAIL;
     private static final String ERR_START_DATE_AFTER_END_DATE = "End date must be after start date";
+
 
     // for user dashboard hashmap key values
     private static final String USER_DASHBOARD_APPROVED_TEAMS = "numberOfApprovedTeam";
@@ -837,6 +843,10 @@ public class MainController {
                                 EmailAlreadyExistsException |
                                 InvalidTeamNameException |
                                 InvalidPasswordException |
+                                OpenStackConnectionException|
+                                OpenStackInternalErrorException|
+                                OpenStackUserNameAlreadyExistsException|
+                                OpenStackProjectNameAlreadyExistsException|
                                 DeterLabOperationFailedException e) {
                     redirectAttributes.addFlashAttribute(MESSAGE, e.getMessage());
                     redirectAttributes.addFlashAttribute("signUpMergedForm", signUpMergedForm);
@@ -879,6 +889,10 @@ public class MainController {
                             EmailAlreadyExistsException |
                             InvalidTeamNameException |
                             InvalidPasswordException |
+                            OpenStackConnectionException|
+                            OpenStackInternalErrorException|
+                            OpenStackUserNameAlreadyExistsException|
+                            OpenStackProjectNameAlreadyExistsException|
                             DeterLabOperationFailedException e) {
                 redirectAttributes.addFlashAttribute(MESSAGE, e.getMessage());
                 redirectAttributes.addFlashAttribute("signUpMergedForm", signUpMergedForm);
@@ -917,7 +931,12 @@ public class MainController {
             EmailAlreadyExistsException,
             InvalidTeamNameException,
             InvalidPasswordException,
+            OpenStackConnectionException,
+            OpenStackInternalErrorException,
+            OpenStackUserNameAlreadyExistsException,
+            OpenStackProjectNameAlreadyExistsException,
             DeterLabOperationFailedException {
+
         HttpEntity<String> request = createHttpEntityWithBodyNoAuthHeader(mainObject.toString());
         restTemplate.setErrorHandler(new MyResponseErrorHandler());
         ResponseEntity response = restTemplate.exchange(properties.getSioRegUrl(), HttpMethod.POST, request, String.class);
@@ -961,6 +980,21 @@ public class MainController {
                         log.warn("Register new users : email already exists: {}", email);
                         throw new EmailAlreadyExistsException(ERROR_PREFIX + email + " already in use.");
                     }
+                    case OPENSTACK_CONNECTION_EXCEPTION:
+                        log.warn("Register new user failed on OpenStack connection: {}", error.getMessage());
+                        throw new OpenStackConnectionException(ERR_SERVER_OVERLOAD);
+                    case OPENSTACK_INTERNAL_ERROR_EXCEPTION:
+                        log.warn("Register new user failed on internal OpenStack server: {}", error.getMessage());
+                        throw new OpenStackConnectionException(ERR_SERVER_OVERLOAD);
+                    case OPENSTACK_USER_NAME_ALREADY_EXISTS_EXCEPTION:
+                        log.warn("Register new user failed: OpenStack user with same name already exists: {}", error.getMessage());
+                        throw new OpenStackUserNameAlreadyExistsException(ERR_SERVER_OVERLOAD);
+                    case OPENSTACK_PROJECT_NAME_ALREADY_EXISTS_EXCEPTION:
+                        log.warn("Register new user failed: OpenStack project with same name already exists: {}", error.getMessage());
+                        throw new OpenStackProjectNameAlreadyExistsException(ERR_SERVER_OVERLOAD);
+                    case OPENSTACK_PROJECT_NOT_FOUND_EXCEPTION:
+                        log.warn("Register new user failed: OpenStack project that user applied join does not exist: {}", error.getMessage());
+                        throw new OpenStackProjectNameAlreadyExistsException(ERR_SERVER_OVERLOAD);
                     default:
                         log.warn("Registration or adapter connection fail");
                         // possible sio or adapter connection fail
@@ -973,6 +1007,7 @@ public class MainController {
         } catch (IOException e) {
             throw new WebServiceRuntimeException(e.getMessage());
         }
+
     }
 
     /**
@@ -1269,7 +1304,7 @@ public class MainController {
         try {
             response = restTemplate.exchange(properties.getApproveJoinRequest(teamId, userId), HttpMethod.POST, request, String.class);
         } catch (RestClientException e) {
-            log.warn("Error connecting to sio team service: {}", e);
+            log.warn("Error connecting to sio registration service: {}", e);
             redirectAttributes.addFlashAttribute(MESSAGE, ERR_SERVER_OVERLOAD);
             return "redirect:/approve_new_user";
         }
@@ -1287,7 +1322,19 @@ public class MainController {
                         break;
                     case DETERLAB_OPERATION_FAILED_EXCEPTION:
                         log.warn("Approve join request: User {}, Team {} fail", userId, teamId);
-                        redirectAttributes.addFlashAttribute(MESSAGE, "Approve join request fail");
+                        redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_JOIN_REQUEST_FAIL);
+                        break;
+                    case OPENSTACK_CONNECTION_EXCEPTION:
+                        log.warn("Approve join request: User {}, Team {} fail on OpenStack connection", userId, teamId);
+                        redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_JOIN_REQUEST_FAIL);
+                        break;
+                    case OPENSTACK_INTERNAL_ERROR_EXCEPTION:
+                        log.warn("Approve join request: User {}, Team {} fail on internal OpenStack server", userId, teamId);
+                        redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_JOIN_REQUEST_FAIL);
+                        break;
+                    case OPENSTACK_USER_NOT_FOUND_EXCEPTION:
+                        log.warn("Approve join request: User {}, Team {} failed as OpenStack user name not found", userId, teamId);
+                        redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_JOIN_REQUEST_FAIL);
                         break;
                     default:
                         log.warn("Server side error: {}", error.getError());
@@ -1300,6 +1347,7 @@ public class MainController {
                 throw new WebServiceRuntimeException(ioe.getMessage());
             }
         }
+
         // everything looks OK?
         log.info("Join request has been APPROVED, User {}, Team {}", userId, teamId);
         redirectAttributes.addFlashAttribute(MESSAGE_SUCCESS, "Join request has been APPROVED.");
@@ -1325,7 +1373,7 @@ public class MainController {
         try {
             response = restTemplate.exchange(properties.getRejectJoinRequest(teamId, userId), HttpMethod.DELETE, request, String.class);
         } catch (RestClientException e) {
-            log.warn("Error connecting to sio team service: {}", e);
+            log.warn("Error connecting to sio registration service: {}", e);
             redirectAttributes.addFlashAttribute(MESSAGE, ERR_SERVER_OVERLOAD);
             return "redirect:/approve_new_user";
         }
@@ -1339,7 +1387,19 @@ public class MainController {
                 switch (exceptionState) {
                     case DETERLAB_OPERATION_FAILED_EXCEPTION:
                         log.warn("Reject join request: User {}, Team {} fail", userId, teamId);
-                        redirectAttributes.addFlashAttribute(MESSAGE, "Reject join request fail");
+                        redirectAttributes.addFlashAttribute(MESSAGE, REJECT_JOIN_REQUEST_FAIL);
+                        break;
+                    case OPENSTACK_CONNECTION_EXCEPTION:
+                        log.warn("Reject join request: User {}, Team {} fail on OpenStack connection", userId, teamId);
+                        redirectAttributes.addFlashAttribute(MESSAGE, REJECT_JOIN_REQUEST_FAIL);
+                        break;
+                    case OPENSTACK_INTERNAL_ERROR_EXCEPTION:
+                        log.warn("Reject join request: User {}, Team {} fail on internal OpenStack server", userId, teamId);
+                        redirectAttributes.addFlashAttribute(MESSAGE, REJECT_JOIN_REQUEST_FAIL);
+                        break;
+                    case OPENSTACK_USER_NOT_FOUND_EXCEPTION:
+                        log.warn("Reject join request: User {}, Team {} failed as OpenStack user not found", userId, teamId);
+                        redirectAttributes.addFlashAttribute(MESSAGE, REJECT_JOIN_REQUEST_FAIL);
                         break;
                     default:
                         log.warn("Server side error: {}", error.getError());
@@ -1352,6 +1412,7 @@ public class MainController {
                 throw new WebServiceRuntimeException(ioe.getMessage());
             }
         }
+
         // everything looks OK?
         log.info("Join request has been REJECTED, User {}, Team {}", userId, teamId);
         redirectAttributes.addFlashAttribute(MESSAGE, "Join request has been REJECTED.");
@@ -1999,6 +2060,10 @@ public class MainController {
                 exceptionMessageMap.put(ADAPTER_CONNECTION_EXCEPTION, "Connection to adapter failed");
                 exceptionMessageMap.put(ADAPTER_INTERNAL_ERROR_EXCEPTION, "Internal server error on adapter");
                 exceptionMessageMap.put(DETERLAB_OPERATION_FAILED_EXCEPTION, "Operation failed on DeterLab");
+                exceptionMessageMap.put(OPENSTACK_CONNECTION_EXCEPTION, "Connection failed on OpenStack connection");
+                exceptionMessageMap.put(OPENSTACK_INTERNAL_ERROR_EXCEPTION, "Connection failed on internal OpenStack server");
+                exceptionMessageMap.put(OPENSTACK_PROJECT_NAME_ALREADY_EXISTS_EXCEPTION, "OpenStack project with same name found");
+                exceptionMessageMap.put(OPENSTACK_USER_NOT_FOUND_EXCEPTION, "OpenStack user could not be found");
 
                 MyErrorResource error = objectMapper.readValue(responseBody, MyErrorResource.class);
                 ExceptionState exceptionState = ExceptionState.parseExceptionState(error.getError());
@@ -2092,6 +2157,10 @@ public class MainController {
                 exceptionMessageMap.put(ADAPTER_CONNECTION_EXCEPTION, "Connection to adapter failed");
                 exceptionMessageMap.put(ADAPTER_INTERNAL_ERROR_EXCEPTION, "Internal server error on adapter");
                 exceptionMessageMap.put(DETERLAB_OPERATION_FAILED_EXCEPTION, "Operation failed on DeterLab");
+                exceptionMessageMap.put(OPENSTACK_CONNECTION_EXCEPTION, "Connection failed on OpenStack connection");
+                exceptionMessageMap.put(OPENSTACK_INTERNAL_ERROR_EXCEPTION, "Connection failed on internal OpenStack server");
+                exceptionMessageMap.put(OPENSTACK_PROJECT_NOT_FOUND_EXCEPTION, "OpenStack project not found");
+                exceptionMessageMap.put(OPENSTACK_USER_NOT_FOUND_EXCEPTION, "OpenStack user not found");
 
                 MyErrorResource error = objectMapper.readValue(responseBody, MyErrorResource.class);
                 ExceptionState exceptionState = ExceptionState.parseExceptionState(error.getError());
@@ -3479,7 +3548,19 @@ public class MainController {
                     break;
                 case DETERLAB_OPERATION_FAILED_EXCEPTION:
                     log.warn("Approve team: Team {} fail", teamId);
-                    redirectAttributes.addFlashAttribute(MESSAGE, "Approve team request fail on Deterlab");
+                    redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_TEAM_REQUEST_FAIL);
+                    break;
+                case OPENSTACK_CONNECTION_EXCEPTION:
+                    log.warn("Approve team: Team {} fail on OpenStack connection", teamId);
+                    redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_TEAM_REQUEST_FAIL);
+                    break;
+                case OPENSTACK_INTERNAL_ERROR_EXCEPTION:
+                    log.warn("Approve team: Team {} fail on internal OpenStack server", teamId);
+                    redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_TEAM_REQUEST_FAIL);
+                    break;
+                case OPENSTACK_PROJECT_NOT_FOUND_EXCEPTION:
+                    log.warn("Approve team: Project {} not found on OpenStack", teamId);
+                    redirectAttributes.addFlashAttribute(MESSAGE, APPROVE_TEAM_REQUEST_FAIL);
                     break;
                 default:
                     log.warn("Approve team : sio or deterlab adapter connection error");
@@ -3498,6 +3579,7 @@ public class MainController {
             log.warn("Approve team {} FAIL", teamId);
             redirectAttributes.addFlashAttribute(MESSAGE, ERR_SERVER_OVERLOAD);
         }
+
         return "redirect:/admin";
     }
 
@@ -3553,7 +3635,19 @@ public class MainController {
                     break;
                 case DETERLAB_OPERATION_FAILED_EXCEPTION:
                     log.warn("Reject team: Team {} fail", teamId);
-                    redirectAttributes.addFlashAttribute(MESSAGE, "Reject team request fail on Deterlab");
+                    redirectAttributes.addFlashAttribute(MESSAGE, REJECT_TEAM_REQUEST_FAIL);
+                    break;
+                case OPENSTACK_CONNECTION_EXCEPTION:
+                    log.warn("Reject team: Team {} fail on OpenStack connection", teamId);
+                    redirectAttributes.addFlashAttribute(MESSAGE, REJECT_TEAM_REQUEST_FAIL);
+                    break;
+                case OPENSTACK_INTERNAL_ERROR_EXCEPTION:
+                    log.warn("Reject team: Team {} fail on internal OpenStack server", teamId);
+                    redirectAttributes.addFlashAttribute(MESSAGE, REJECT_TEAM_REQUEST_FAIL);
+                    break;
+                case OPENSTACK_PROJECT_NOT_FOUND_EXCEPTION:
+                    log.warn("Reject team: Team {} not found on OpenStack", teamId);
+                    redirectAttributes.addFlashAttribute(MESSAGE, REJECT_TEAM_REQUEST_FAIL);
                     break;
                 default:
                     log.warn("Reject team : sio or deterlab adapter connection error");
@@ -3572,6 +3666,7 @@ public class MainController {
             log.warn("Reject team {} FAIL", teamId);
             redirectAttributes.addFlashAttribute(MESSAGE, ERR_SERVER_OVERLOAD);
         }
+
         return "redirect:/admin";
     }
 
