@@ -53,6 +53,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework.boot:spring-boot-starter-thymeleaf'
     compile 'org.springframework.boot:spring-boot-starter-websocket'
+    compile "org.springframework.ldap:spring-ldap-core"
     compile 'org.thymeleaf.extras:thymeleaf-extras-java8time' // for thymeleaf to format zoneddatetime into readable format
     compile 'javax.inject:javax.inject'
     compile 'org.json:json'

@@ -18,13 +18,17 @@
         <p>&nbsp;</p>
         <form class="form-horizontal" method="post" action="#" th:action="@{/admin/gpus}" role="form">
             <div class="form-group">
-                <label for="gpu" class="col-sm-2 control-label">GPU :</label>
-                <div class="col-sm-6">
+
+                <!-- Remove GPU selection
+                 <label for="gpu" class="col-sm-2 control-label">GPU :</label>
+                 <div class="col-sm-6">
                     <select id="gpu" class="form-control" th:name="gpu">
                         <option th:each="domain,iter : ${domains}" th:value="${iter.index}"
                                 th:text="${domain.getHost()}" th:selected="${selectedGpu == iter.index}"></option>
                     </select>
                 </div>
+                -->
+
                 <div class="col-sm-1">
                     <button type="submit" class="btn btn-default" title="Get GPU Users">Get Users</button>
                 </div>
@@ -81,7 +85,8 @@
                 <h4 class="modal-title" id="addLabel">Add New User?</h4>
             </div>
             <div class="modal-body">
-                <form method="post" action="#" th:action="@{/admin/gpus/{gpu}/users/add(gpu=${selectedGpu})}" th:object="${gpuUserForm}" role="form" id="addUserForm">
+                <!-- Change the target URL -->
+                <form method="post" action="#" th:action="@{/admin/gpus/users/add}" th:object="${gpuUserForm}" role="form" id="addUserForm">
                     <p class="account-change-fail" th:if="${#fields.hasErrors('username')}"><i class="fa fa-exclamation-circle"></i> <span th:errors="*{username}"></span></p>
                     <p class="account-change-fail" th:if="${#fields.hasErrors('fullname')}"><i class="fa fa-exclamation-circle"></i> <span th:errors="*{fullname}"></span></p>
                     <p class="account-change-fail" th:if="${#fields.hasErrors('password')}">
