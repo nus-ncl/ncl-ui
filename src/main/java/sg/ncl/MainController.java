@@ -3478,7 +3478,8 @@ public class MainController {
 
         if (bindingResult.hasErrors() || !gpuUserForm.isValid()) {
             log.warn("Gpu user form has errors {}", gpuUserForm.toString());
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.gpuUserForm", bindingResult);/            redirectAttributes.addFlashAttribute("gpuUserForm", gpuUserForm);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.gpuUserForm", bindingResult);
+            redirectAttributes.addFlashAttribute("gpuUserForm", gpuUserForm);
             redirectAttributes.addFlashAttribute("toggleModal", "show");
         } else {
             LdapTemplate template = ldapProperties.getTemplate();
@@ -3557,7 +3558,7 @@ public class MainController {
     private Map<String, String> getGpuUsers(){
         LdapTemplate template = ldapProperties.getTemplate();
         List<String> users = template.search(
-                "dc=dev,dc=ncl,dc=sg",
+                ldapProperties.getDn(),
                 "(objectClass=person)",
                 (AttributesMapper<String>) attrs ->
                         (String) attrs.get("cn").get());

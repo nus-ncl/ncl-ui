@@ -6,6 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.ldap.core.LdapTemplate;
 import org.springframework.ldap.core.support.LdapContextSource;
 
+/**
+ * Created by dcsacr on 27-Jan-21.
+ */
+
 @ConfigurationProperties(prefix = LdapProperties.PREFIX)
 @Getter
 @Setter
@@ -44,7 +48,7 @@ public class LdapProperties {
 
     public String getDn(){return dn; }
 
-    public String getCredential(){return dn; }
+    public String getCredential(){return credential; }
 
     public String getGidnumber(){return gidnumber; }
 
