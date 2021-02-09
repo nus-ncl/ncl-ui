@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "ncl.web.ldap.host=172.18.178.29",
         "ncl.web.ldap.port=389",
         "ncl.web.ldap.dn=dc=dev,dc=ncl,dc=sg",
-        "ncl.web.ldap.credential=deterinavm1",
+        "ncl.web.ldap.credential=",
         "ncl.web.ldap.gidnumber=5000"
 })
 public class LdapPropertiesTest {
@@ -63,7 +63,7 @@ public class LdapPropertiesTest {
 
     @Test
     public void testLdapCredential() throws Exception {
-        assertThat(properties.getCredential()).isEqualTo("deterinavm1");
+        assertThat(properties.getCredential()).isEqualTo("");
     }
 
     @Test
