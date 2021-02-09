@@ -53,9 +53,14 @@ public class WebApplication {
         return new WebSocketProperties();
     }
 
+    //@Bean
+    //GpuProperties gpuProperties() {
+    //    return new GpuProperties();
+    //}
+
     @Bean
-    GpuProperties gpuProperties() {
-        return new GpuProperties();
+    LdapProperties ldapProperties() {
+        return new LdapProperties();
     }
 
     @Bean

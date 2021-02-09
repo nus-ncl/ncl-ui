@@ -776,6 +776,34 @@ public class MainControllerTest {
     }
 
     @Test
+    public void testGetGpuDashboard() throws Exception {
+        final String id = RandomStringUtils.randomAlphabetic(10);
+
+        mockMvc.perform(get("/admin/gpus")
+                                .sessionAttr("id", id)
+                                .sessionAttr("roles",
+                                             UserType.ADMIN.toString()))
+                .andExpect(status().isOk());
+    }
+
+
+    @Test
+    public void testAddGpuUser() throws Exception {
+        final String id = RandomStringUtils.randomAlphabetic(10);
+
+        MvcResult result = mockMvc.perform(
+                post("/admin/gpus/users/add")
+                        .sessionAttr("id", id)
+                        .sessionAttr("roles", UserType.ADMIN.toString())
+                        .param("username", "apple")
+                        .param("fullname", "apple apple")
+                        .param("Password", "appleP@ssword")
+                        .param("confirmPassword", "appleP@ssword"))
+                        .andExpect(redirectedUrl("/admin/gpus"))
+                        .andReturn();
+    }
+
+        @Test
     public void testResetPasswordEnterEmail() throws Exception {
 
         mockMvc.perform(

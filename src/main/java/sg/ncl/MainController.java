@@ -3430,7 +3430,9 @@ public class MainController {
 //    }
 
     @RequestMapping(value = "/admin/gpus", method = RequestMethod.GET)
-    public String adminGpuManagement(Model model, HttpSession session) {
+    public String adminGpuManagement(Model model, RedirectAttributes
+            redirectAttributes, HttpSession session) {
+
         if (!validateIfAdmin(session)) {
             return NO_PERMISSION_PAGE;
         }
@@ -3439,20 +3441,21 @@ public class MainController {
             model.addAttribute("gpuUserForm", new GpuUserForm());
             model.addAttribute("toggleModal", "hide");
         }
+        redirectAttributes.addFlashAttribute("gpuUsersMap", getGpuUsers());
         return "gpu_dashboard";
     }
 
-    @RequestMapping(value = "/admin/gpus", method = RequestMethod.POST)
-    public String adminGetGpuUsers(@RequestParam("gpu") Integer gpu,
-                                   RedirectAttributes redirectAttributes,
-                                   HttpSession session) throws WebServiceRuntimeException {
-        if (!validateIfAdmin(session)) {
-            return NO_PERMISSION_PAGE;
-        }
+//    @RequestMapping(value = "/admin/gpus", method = RequestMethod.POST)
+//    public String adminGetGpuUsers(@RequestParam("gpu") Integer gpu,
+//                                   RedirectAttributes redirectAttributes,
+//                                   HttpSession session) throws WebServiceRuntimeException {
+//        if (!validateIfAdmin(session)) {
+//            return NO_PERMISSION_PAGE;
+//        }
 
-        redirectAttributes.addFlashAttribute("gpuUsersMap", getGpuUsers());
-        return "redirect:/admin/gpus";
-    }
+//        redirectAttributes.addFlashAttribute("gpuUsersMap", getGpuUsers());
+//        return "redirect:/admin/gpus";
+//    }
 
 //    @RequestMapping(value = "/admin/gpus", method = RequestMethod.POST)
 //    public String adminGetGpuUsers(@RequestParam("gpu") Integer gpu,
