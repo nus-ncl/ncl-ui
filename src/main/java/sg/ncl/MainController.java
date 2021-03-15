@@ -999,6 +999,7 @@ public class MainController {
     //Comment out as per G/J request to remove log in for users momentary
     @RequestMapping(value = "/signup2", method = RequestMethod.GET)
     public String signup2(Model model, HttpServletRequest request) {
+        log.warn("signup2 get, client_ip={},server_ip={}", request.getRemoteAddr(),request.getLocalAddr());
         Map<String, ?> inputFlashMap = RequestContextUtils.getInputFlashMap(request);
         if (inputFlashMap != null) {
             log.debug((String) inputFlashMap.get(MESSAGE));
@@ -1015,9 +1016,9 @@ public class MainController {
             @Valid
             @ModelAttribute(SIGNUP_MERGED_FORM) SignUpMergedForm signUpMergedForm,
             BindingResult bindingResult,
-            final RedirectAttributes redirectAttributes) throws WebServiceRuntimeException {
+            final RedirectAttributes redirectAttributes, HttpServletRequest request) throws WebServiceRuntimeException {
         if (bindingResult.hasErrors() || !signUpMergedForm.getIsValid()) {
-            log.warn("Register form has errors {}", signUpMergedForm.toString());
+            log.warn("Register form has errors {},client_ip={},server_ip={}", signUpMergedForm.toString(),request.getRemoteAddr(),request.getLocalAddr());
             return SIGNUP_PAGE;
         }
 
