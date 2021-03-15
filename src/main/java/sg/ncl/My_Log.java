@@ -22,7 +22,7 @@ public class My_Log {
         return ip;
     }
 
-    public my_log(String severity, String msg, HttpServletRequest request) {
+    public void my_log(String severity, String msg, HttpServletRequest request) {
         if (severity == "warn") {
             log.warn("{}, client_ip={}", msg, GetRemoteClientIP(request));
         }
