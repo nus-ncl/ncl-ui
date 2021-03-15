@@ -999,7 +999,9 @@ public class MainController {
     //Comment out as per G/J request to remove log in for users momentary
     @RequestMapping(value = "/signup2", method = RequestMethod.GET)
     public String signup2(Model model, HttpServletRequest request) {
-        log.warn("signup2 get, client_ip={},server_ip={}", request.getRemoteAddr(),request.getLocalAddr());
+            My_Log obj = new My_Log();
+//        log.warn("signup2 get, client_ip={},server_ip={}", request.getRemoteAddr(),request.getLocalAddr());
+        log.warn("signup2 get, client_ip={},server_ip={}", obj.GetRemoteClientIP(request),request.getLocalAddr());
         Map<String, ?> inputFlashMap = RequestContextUtils.getInputFlashMap(request);
         if (inputFlashMap != null) {
             log.debug((String) inputFlashMap.get(MESSAGE));
@@ -1017,8 +1019,10 @@ public class MainController {
             @ModelAttribute(SIGNUP_MERGED_FORM) SignUpMergedForm signUpMergedForm,
             BindingResult bindingResult,
             final RedirectAttributes redirectAttributes, HttpServletRequest request) throws WebServiceRuntimeException {
+        My_Log obj = new My_Log();
         if (bindingResult.hasErrors() || !signUpMergedForm.getIsValid()) {
-            log.warn("Register form has errors {},client_ip={},server_ip={}", signUpMergedForm.toString(),request.getRemoteAddr(),request.getLocalAddr());
+//            log.warn("Register form has errors {},client_ip={},server_ip={}", signUpMergedForm.toString(),request.getRemoteAddr(),request.getLocalAddr());
+            log.warn("Register form has errors {},client_ip={},server_ip={}", signUpMergedForm.toString(),obj.GetRemoteClientIP(request),request.getLocalAddr());
             return SIGNUP_PAGE;
         }
 
