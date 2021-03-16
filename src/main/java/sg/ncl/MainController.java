@@ -251,7 +251,7 @@ public class MainController {
 
     private static final String ADMIN_MONTHLY_USAGE_CONTRIBUTE = "admin_monthly_usage_contribute";
     private static final String ADMIN_MONTHLY_CONTRIBUTE = "admin_monthly_contribute";
-    private My_Log my_log = new My_Log();
+    private Logger logger = new Logger();
 
 
     @ModelAttribute
@@ -1000,10 +1000,7 @@ public class MainController {
     //Comment out as per G/J request to remove log in for users momentary
     @RequestMapping(value = "/signup2", method = RequestMethod.GET)
     public String signup2(Model model, HttpServletRequest request) {
-//            My_Log obj = new My_Log();
-//        log.warn("signup2 get, client_ip={},server_ip={}", request.getRemoteAddr(),request.getLocalAddr());
-//        log.warn("signup2 get, client_ip={},server_ip={}", obj.GetRemoteClientIP(request),request.getLocalAddr());
-        my_log.my_log("warn","signup2 get",request);
+        logger.advancedLog("warn","signup2 get",request);
         Map<String, ?> inputFlashMap = RequestContextUtils.getInputFlashMap(request);
         if (inputFlashMap != null) {
             log.debug((String) inputFlashMap.get(MESSAGE));
