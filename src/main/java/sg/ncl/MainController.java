@@ -1022,7 +1022,7 @@ public class MainController {
         if (bindingResult.hasErrors() || !signUpMergedForm.getIsValid()) {
 //            log.warn("Register form has errors {},client_ip={},server_ip={}", signUpMergedForm.toString(),request.getRemoteAddr(),request.getLocalAddr());
 //            log.warn("Register form has errors {},client_ip={},server_ip={}", signUpMergedForm.toString(),obj.GetRemoteClientIP(request),request.getLocalAddr());
-            my_log.my_log("error","Register form has errors",request);
+            logger.advancedLog("error","Register form has errors: "+signUpMergedForm.toString(),request);
             return SIGNUP_PAGE;
         }
 

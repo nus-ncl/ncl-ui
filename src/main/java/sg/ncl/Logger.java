@@ -24,16 +24,16 @@ public class Logger {
 
     public void advancedLog(String severity, String msg, HttpServletRequest request) {
         if (severity == "debug") {
-            log.debug("client_ip={},{}", msg, GetRemoteClientIP(request));
+            log.debug("client_ip={},msg: {}", GetRemoteClientIP(request), msg);
         }
         if (severity == "info") {
-            log.info("client_ip={},{}", msg, GetRemoteClientIP(request));
+            log.info("client_ip={},msg: {}", GetRemoteClientIP(request), msg);
         }
         if (severity == "warn") {
-            log.warn("client_ip={},{}", msg, GetRemoteClientIP(request));
+            log.warn("client_ip={},msg: {}", GetRemoteClientIP(request), msg);
         }
         if (severity == "error") {
-            log.error("client_ip={},{}", msg, GetRemoteClientIP(request));
+            log.error("client_ip={},msg: {}", GetRemoteClientIP(request), msg);
         }
     }
 }
